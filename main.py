@@ -4,32 +4,45 @@ from models.metrics import SystemMetrics
 from datetime import datetime
 from monitoring.logger import setup_logger
 from monitoring.threshold import check_thresholds
+from config.config import SERVERS
 
+
+logger = setup_logger()
 
 metrics = collect_metrics()
 service_status = get_service_status("python.exe")
 
 timestamp = datetime.now()
 
-system_metric = SystemMetrics(
-    server_id="local-machine",
-    timestamp=timestamp.isoformat(),
-    cpu_usage=metrics["cpu_usage"],
-    memory_usage=metrics["memory_usage"],
-    disk_usage=metrics["disk_usage"],
-    uptime=metrics["uptime"],
-    service_status=service_status
-)
 
-logger = setup_logger()
+for server in SERVERS:
 
-logger.info("Monitoring snapshot collected")
+    system_metric = SystemMetrics(
+        server_id=server,
+        timestamp=timestamp.isoformat(),
+        cpu_usage=metrics["cpu_usage"],
+        memory_usage=metrics["memory_usage"],
+        disk_usage=metrics["disk_usage"],
+        uptime=metrics["uptime"],
+        service_status=service_status
+    )
 
-print(system_metric)
+    logger.info("Monitoring snapshot collected")
 
-alerts = check_thresholds(metrics)
+    logger.info(f"CPU Usage: {system_metric.cpu_usage}%")
+    logger.info(f"Memory Usage: {system_metric.memory_usage}%")
+    logger.info(f"Disk Usage: {system_metric.disk_usage}%")
 
-if alerts:
-    for alert in alerts:
-        logger.warning(alert)
-        print(alert)
+    logger.info(
+        f"Service {service_status['service']}: "
+        f"{service_status['status']}"
+    )
+
+    print(system_metric)
+
+    alerts = check_thresholds(metrics)
+
+    if alerts:
+        for alert in alerts:
+            logger.warning(alert)
+            print(alert)
