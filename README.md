@@ -88,6 +88,10 @@ This project aims to proactively detect infrastructure issues through automated 
 
 ## Current Architecture
 
+## Architecture Diagram v1
+
+![Cloud Infrastructure Monitoring Architecture](architecture/architecture-v1.png)
+
 ### Development Environment
 
 ```text
