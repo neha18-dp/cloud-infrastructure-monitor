@@ -1,19 +1,17 @@
-"""
-AWS SNS integration module.
+import boto3
 
-Purpose:
-Send alerts when thresholds are exceeded.
+sns = boto3.client("sns", region_name="ap-south-1")
 
-Status:
-Planned for AWS deployment phase.
-"""
+TOPIC_ARN = "arn:aws:sns:ap-south-1:899505639594:CloudMonitorAlerts"
 
 
-def send_alert(message: str) -> None:
-    """
-    Send monitoring alert through AWS SNS.
+def send_alert(message):
 
-    Args:
-        message: Alert message.
-    """
-    pass
+    sns.publish(
+        TopicArn=TOPIC_ARN,
+        Subject="Cloud Monitor Alert",
+        Message=message
+    )
+
+
+    print("Alert email sent.")

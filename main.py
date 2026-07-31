@@ -5,6 +5,8 @@ from datetime import datetime
 from monitoring.logger import setup_logger
 from monitoring.threshold import check_thresholds
 from config.config import SERVERS
+from aws.dynamodb import save_metrics
+from aws.sns import send_alert
 
 
 logger = setup_logger()
@@ -27,6 +29,8 @@ for server in SERVERS:
         service_status=service_status
     )
 
+    save_metrics(system_metric)
+
     logger.info("Monitoring snapshot collected")
 
     logger.info(f"CPU Usage: {system_metric.cpu_usage}%")
@@ -46,3 +50,4 @@ for server in SERVERS:
         for alert in alerts:
             logger.warning(alert)
             print(alert)
+            send_alert(alert)
