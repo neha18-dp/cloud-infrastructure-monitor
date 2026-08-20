@@ -14,8 +14,12 @@ logger = setup_logger()
 metrics = collect_metrics()
 service_status = get_service_status("python.exe")
 
+# Add service status to metrics for SNS email
+metrics["service_status"] = service_status
+
 timestamp = datetime.now()
 
+all_alerts = []
 
 for server in SERVERS:
 
@@ -32,7 +36,6 @@ for server in SERVERS:
     save_metrics(system_metric)
 
     logger.info("Monitoring snapshot collected")
-
     logger.info(f"CPU Usage: {system_metric.cpu_usage}%")
     logger.info(f"Memory Usage: {system_metric.memory_usage}%")
     logger.info(f"Disk Usage: {system_metric.disk_usage}%")
@@ -46,8 +49,18 @@ for server in SERVERS:
 
     alerts = check_thresholds(metrics)
 
-    if alerts:
-        for alert in alerts:
-            logger.warning(alert)
-            print(alert)
-            send_alert(alert)
+    for alert in alerts:
+        logger.warning(alert)
+        print(alert)
+
+        # Collect alert instead of sending immediately
+        all_alerts.append((server, alert))
+
+
+# Send ONE SNS email for the entire monitoring run
+if all_alerts:
+    send_alert(
+        all_alerts,
+        metrics,
+        timestamp.isoformat()
+    )
